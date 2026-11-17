@@ -9,7 +9,7 @@
 The patch grows the ROM to 3 MB: the game's 16×16 font moves to the third megabyte (`$200000`).
 
 - **Repo emulator:** open the patched file.
-- **MAME:** load it as a loose cartridge, byte-swapped as usual for loose files:
+- **MAME:** load it as a loose cartridge:
   `mame supracan -cart "Super Taiwanese Baseball League (EN).bin"`. The `staiwbbl` software-list entry
   is 2 MB, so MAME would cut the file.
 
