@@ -1,5 +1,14 @@
 # Super Taiwanese Baseball League (超級中華職棒聯盟, Super A'Can) — English Translation
 
+## Screenshots
+
+<p>
+<img src="screenshots/1.png" width="400" alt="Title menu: Season, Open, AllStr">
+<img src="screenshots/2.png" width="400" alt="Batting with English scoreboard">
+<img src="screenshots/3.png" width="400" alt="Batter panel with TODAY stats">
+<img src="screenshots/4.png" width="400" alt="Fielding play: Foul">
+</p>
+
 ## How to Play
 
 | Patch | Apply to | Result |
