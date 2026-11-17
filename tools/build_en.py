@@ -39,6 +39,17 @@ NEW = {
 }
 
 
+# Scoreboard (ROZ layer): raw 4bpp tiles copied into VRAM by the game
+MASCOTS, MASCOT_EN = 0x11D980, ["EL", "LI", "EA", "TI", "DR", "BE", "GI", "CD", "SL", "HA", "TW", "JP"]  # 16x16, TL TR BL BR
+NUMERALS = (0x065D20, 0x067D20)              # 一..十, 8x16 (top tile, bottom tile); two copies of the sheet
+INNING = {0x11CBE0: "", 0x11CFA0: "up", 0x11CFC0: "down"}   # 局 / 上 / 下: top tile, bottom tile at +$200
+SMALL = {0x11CB40: ["11110000", "10001000", "10001000", "11110000", "10000000", "10000000", "10000000", ""],   # 投 -> P ([P] = pitcher)
+         0x11CB80: ["", "", "11110000", "10001000", "10001000", "11110000", "10000000", "10000000"],  # 球 -> p (pitches)
+         0x11CB60: ["10001000", "10001000", "10001000", "11111000", "10001000", "10001000", "10001000", ""]}  # 安 -> H (hits)
+TODAY = 0x11DFA0                             # 今日成績 header: 7x2 tiles, bg 3, text 11, shadow 12
+INK = 9                                      # cream
+
+
 def swap16(b):
     b = bytearray(b); b[0::2], b[1::2] = b[1::2], b[0::2]; return b
 
@@ -143,6 +154,56 @@ def main():
     print(f"Names: {len(refs)} name strings, {sum(len(v) for v in refs.values())} pointers, free space used to ${free:06X}")
     if missing:
         print("  (not found in records:", " ".join(missing), ")")
+
+    # 3b. scoreboard: team mascots, inning numerals, top/bottom marks
+    def cell(rows):                       # 16 rows of 8 bits -> two 4bpp 8x8 tiles (top, bottom)
+        out = []
+        for half in (rows[:8], rows[8:]):
+            t = bytearray()
+            for r in half:
+                for x in range(0, 8, 2):
+                    t.append((INK if r >> (7 - x) & 1 else 0) << 4 | (INK if r >> (6 - x) & 1 else 0))
+            out.append(bytes(t))
+        return out
+    font = {chr(c): list(glyphs[16 * i:16 * i + 16]) for i, c in enumerate(codes)}
+    for k, two in enumerate(MASCOT_EN):
+        (lt, lb), (rt, rb) = cell(font[two[0]]), cell(font[two[1]])
+        a = MASCOTS + 128 * k
+        rom[a:a + 128] = lt + rt + lb + rb
+    ten = [0, 0, 0, 0b01001110, 0b11011011, 0b01011011, 0b01011011, 0b01011011, 0b01011011, 0b01011011,
+           0b01011011, 0b01001110, 0, 0, 0, 0]
+    for n in range(10):
+        top, bottom = cell(ten if n == 9 else font[str(n + 1)])
+        for base in NUMERALS:
+            rom[base + 64 * n:base + 64 * n + 64] = top + bottom
+    marks = {"": [0] * 16,
+             "up": [0, 0, 0, 0, 0b00010000, 0b00111000, 0b00111000, 0b01111100, 0b01111100, 0b11111110, 0, 0, 0, 0, 0, 0],
+             "down": [0, 0, 0, 0, 0b11111110, 0b01111100, 0b01111100, 0b00111000, 0b00111000, 0b00010000, 0, 0, 0, 0, 0, 0]}
+    for a, what in INNING.items():
+        top, bottom = cell(marks[what])
+        rom[a:a + 32], rom[a + 0x200:a + 0x220] = top, bottom
+    for a, rows in SMALL.items():          # 8x8 panel tags
+        t = bytearray()
+        for r in rows:
+            r = r.ljust(8, "0")
+            for x in range(0, 8, 2):
+                t.append((INK if r[x] == "1" else 0) << 4 | (INK if r[x + 1] == "1" else 0))
+        rom[a:a + 32] = t
+    img = [[3] * 56 for _ in range(16)]       # "TODAY" header in the box's style
+    x0 = (56 - 8 * 5) // 2
+    for i, ch in enumerate("TODAY"):
+        for y, r in enumerate(font[ch]):
+            for x in range(8):
+                if r >> (7 - x) & 1:
+                    X = x0 + 8 * i + x
+                    if y + 1 < 16 and X + 1 < 56 and img[y + 1][X + 1] == 3:
+                        img[y + 1][X + 1] = 12
+                    img[y][X] = 11
+    for i in range(14):
+        tx, ty = i % 7, i // 7
+        rom[TODAY + 32 * i:TODAY + 32 * i + 32] = bytes(img[ty * 8 + y][tx * 8 + x] << 4 | img[ty * 8 + y][tx * 8 + x + 1]
+                                                       for y in range(8) for x in range(0, 8, 2))
+    print("Scoreboard: 12 team marks, inning numerals, top/bottom marks, panel tags, TODAY header")
 
     # 4. Big5 font copy with the pair glyphs, at $200000; repoint count / table / glyph references
     assert bcodes == sorted(bcodes)

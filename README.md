@@ -17,11 +17,12 @@ The patch grows the ROM to 3 MB: the game's 16×16 font moves to the third megab
 
 In English: the title menu, every text string (menus, options, controls help, game results,
 leaderboards, standings, stat labels, staff credits), all 263 player names, team abbreviations,
-stadiums. Names are given-name initials + Wade-Giles surname for Taiwanese players ("PS Cheng"),
+stadiums, and the in-game scoreboard graphics (team marks such as LI / DR, inning number with a
+▲/▼ top/bottom mark, the [P] pitcher tag, "p" pitch count, "H" hits, and the TODAY stats box).
+Names are given-name initials + Wade-Giles surname for Taiwanese players ("PS Cheng"),
 English names for foreign players; some Japanese guest-team names are best guesses.
 
-Still Chinese (pre-drawn graphics, not text): the title logo, the scoreboard's team mascot
-characters and inning, the 投手 / 球 tags in the batter/pitcher panels and the 今日成績 box title.
+Still Chinese: the 中華職棒 title logo (compressed sprite art; the menu under it is English).
 Tested in the repo emulator: title menu and the attract-mode game (the emulator does not register
 menu input for this game, so deeper screens were not reached).
 
