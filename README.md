@@ -34,8 +34,7 @@ Put your own dump next to this README, then `python3 tools/build_en.py` (Python 
   character is 2 bytes = two 8-pixel letters, so the width on screen stays the same.
 - `notes/names_en.json`: player names (Big5 → English, ≤ 8 characters).
 
-Only `tools/build_en.py` and `tools/create_ips.py` are used; the other scripts and files in this
-folder are from an earlier attempt.
+Tools: `tools/build_en.py` (build), `tools/create_ips.py` (patch).
 
 ## ROM notes (68k addresses)
 

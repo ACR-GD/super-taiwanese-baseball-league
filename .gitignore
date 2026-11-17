@@ -2,13 +2,3 @@
 *.bin
 __pycache__/
 .DS_Store
-# earlier attempt (not used by the build)
-extracted/
-extract_assets.py
-generate_text_docs.py
-tools/assemble_vwf.py
-tools/build_rom.py
-tools/build_vwf_engine.py
-tools/verify_engine.py
-tools/vwf.py
-build/Super Taiwanese Baseball League (English).ips
